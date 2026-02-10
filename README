@@ -1,0 +1,20 @@
+Name: John Garrett
+Date: 2026-02-10
+Environment: opsys (linux, vi)
+
+How to compile the project:
+make
+
+Example of how to run the project:
+./oss -n 3 -s 2 -t 2
+
+Notes:
+- oss launches user processes up to the simultaneous limit, waiting for one to finish before launching the next.
+- user prints its PID/PPID, sleeps one second per iteration, then prints again.
+
+Generative AI usage:
+Generative AI used: ChatGPT
+Prompts:
+- "read cs4760Assignment1Spring2026.pdf in local directory and create project according to specifications"
+- "Minimal spec: basic oss/user behavior, simple messages, default args, minimal error handling."
+Summary: The AI was helpful for quickly drafting the minimal oss/user code structure and Makefile. I reviewed and kept the code concise for the assignment requirements.
