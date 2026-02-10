@@ -1,6 +1,6 @@
 Name: John Garrett
 Date: 2026-02-10
-Environment: opsys (linux, vi)
+Environment: VS Code
 
 How to compile the project:
 make

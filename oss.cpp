@@ -111,3 +111,7 @@ int main(int argc, char *argv[])
   printf("OSS: summary launched %d finished %d\n", launched, finished);
   return 0;
 }
+
+// 0 < -s < 15
+// 0 < -n < 100
+// -t >= 0
