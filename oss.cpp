@@ -81,15 +81,30 @@ int main(int argc, char *argv[])
     // Enforce minimum process count.
     proc = 1;
   }
+  if (proc > 15)
+  {
+    // Enforce maximum process count.
+    proc = 15;
+  }
   if (simul < 1)
   {
     // Enforce minimum concurrency.
     simul = 1;
   }
+  if (simul > 15)
+  {
+    // Enforce maximum concurrency.
+    simul = 15;
+  }
   if (iter < 0)
   {
     // Disallow negative iterations.
     iter = 1;
+  }
+  if (iter > 15)
+  {
+    // Enforce maximum concurrency.
+    iter = 15;
   }
   if (simul > proc)
   {
@@ -137,3 +152,7 @@ int main(int argc, char *argv[])
   cout << "OSS: summary launched " << launched << " finished " << finished << endl;
   return 0;
 }
+
+// 0 < -s < 15
+// 0 < -n < 100
+// -t >= 0
