@@ -1,17 +1,25 @@
+// Author: John Garrett
+// Date: 2026-02-10
+// Description: Launches and coordinates child processes with configurable limits.
+
 #include <getopt.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
+using namespace std;
+
 static void print_usage(const char *prog)
 {
-  printf("Usage: %s [-h] [-n proc] [-s simul] [-t iter]\n", prog);
+  // Print valid CLI usage for this program.
+  cout << "Usage: " << prog << " [-h] [-n proc] [-s simul] [-t iter]" << endl;
 }
 
+// Spawn a single child process running the user program.
 static int launch_child(int iter)
 {
+  // Fork the process; the child will exec into the user program.
   pid_t pid = fork();
   if (pid < 0)
   {
@@ -20,13 +28,17 @@ static int launch_child(int iter)
   }
   if (pid == 0)
   {
+    // Convert iteration count to a string for exec argument.
     char iter_arg[32];
     snprintf(iter_arg, sizeof(iter_arg), "%d", iter);
-    execl("./user", "user", iter_arg, (char *)NULL);
+
+    // Replace child image with ./user; only returns on error.
+    execlp("./user", "user", iter_arg, static_cast<char *>(nullptr));
     perror("exec");
-    _exit(1);
+    exit(1);
   }
-  printf("OSS: launched PID %d\n", (int)pid);
+  // Parent continues here after successful fork.
+  cout << "OSS: launched PID " << static_cast<int>(pid) << endl;
   return 0;
 }
 
@@ -42,18 +54,23 @@ int main(int argc, char *argv[])
     switch (opt)
     {
     case 'h':
+      // Help flag: print usage and exit.
       print_usage(argv[0]);
       return 0;
     case 'n':
+      // Total number of processes to launch.
       proc = atoi(optarg);
       break;
     case 's':
+      // Maximum number of concurrent processes.
       simul = atoi(optarg);
       break;
     case 't':
+      // Iterations passed to each user process.
       iter = atoi(optarg);
       break;
     default:
+      // Unknown flag: show usage and exit with error.
       print_usage(argv[0]);
       return 1;
     }
@@ -61,18 +78,22 @@ int main(int argc, char *argv[])
 
   if (proc < 1)
   {
+    // Enforce minimum process count.
     proc = 1;
   }
   if (simul < 1)
   {
+    // Enforce minimum concurrency.
     simul = 1;
   }
-  if (iter < 1)
+  if (iter < 0)
   {
+    // Disallow negative iterations.
     iter = 1;
   }
   if (simul > proc)
   {
+    // Concurrency cannot exceed total processes.
     simul = proc;
   }
 
@@ -80,6 +101,7 @@ int main(int argc, char *argv[])
   int launched = 0;
   int finished = 0;
 
+  // Start initial batch up to the concurrent limit.
   while (running < simul && launched < proc)
   {
     if (launch_child(iter) == 0)
@@ -89,9 +111,11 @@ int main(int argc, char *argv[])
     }
   }
 
+  // Maintain the concurrency window until all processes are launched.
   while (launched < proc)
   {
-    wait(NULL);
+    // Block until any child exits.
+    wait(nullptr);
     running--;
     finished++;
     if (launch_child(iter) == 0)
@@ -101,17 +125,15 @@ int main(int argc, char *argv[])
     }
   }
 
+  // Wait for remaining children to finish.
   while (running > 0)
   {
-    wait(NULL);
+    // Drain remaining children.
+    wait(nullptr);
     running--;
     finished++;
   }
 
-  printf("OSS: summary launched %d finished %d\n", launched, finished);
+  cout << "OSS: summary launched " << launched << " finished " << finished << endl;
   return 0;
 }
-
-// 0 < -s < 15
-// 0 < -n < 100
-// -t >= 0
